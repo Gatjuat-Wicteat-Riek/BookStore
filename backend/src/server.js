@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 const PORT = process.env.PORT
 
-app.use("/api/auht", authRoutes);
+app.use("/api/auth", authRoutes);
 
 
 
