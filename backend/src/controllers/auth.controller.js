@@ -1,6 +1,7 @@
 import User from "../models/user.models.js";
 import jwt from "jsonwebtoken";
 import {errorHandler} from "../utils/error.js";
+import {validate} from "deep-email-validator";
 
 const generateToken = (userId)=>{
     return jwt.sign({userId}, process.env.JWT_SECRET, {expiresIn: "1d"})
@@ -22,6 +23,15 @@ export const registerUser = async (req, res, next) => {
         const existingEmail=  await User.findOne({email});
         if(existingEmail){
            return res.status(400).json({message: "Email already exists"})
+        }
+        const validateResults = await validate(email)
+        // verifying if the email is valid or not
+        if(!validateResults.valid){
+            return res.status(400).json({
+                error: "Error",
+                message: "Email is not valid. Please try again",
+                reason: validateResults.reason
+            })
         }
         
         const existingUsername=  await User.findOne({username})
