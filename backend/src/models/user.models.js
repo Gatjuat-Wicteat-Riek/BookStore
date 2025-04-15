@@ -27,12 +27,15 @@ const UserSchema = new mongoose.Schema({
 
 // Hashing the password
 UserSchema.pre("save", async function(next){
-    
     if(!this.isModified("password")) return next // As long as the password is not modified, it should not be hashed
     const genSalt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, genSalt);
     next();
 })
+// Compare password
+UserSchema.methods.comparePassword = async function (userPassword){
+    return await bcrypt.compare(this.password, userPassword);
+}
 
 const User = mongoose.model("User", UserSchema);
 export default User

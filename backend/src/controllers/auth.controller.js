@@ -1,7 +1,7 @@
 import User from "../models/user.models.js";
 import jwt from "jsonwebtoken";
-import {errorHandler} from "../utils/error.js";
-import {validate} from "deep-email-validator";
+import { errorHandler } from "../utils/error.js";
+import { validate } from "deep-email-validator";
 
 const generateToken = (userId)=>{
     return jwt.sign({userId}, process.env.JWT_SECRET, {expiresIn: "1d"})
@@ -11,10 +11,10 @@ export const registerUser = async (req, res, next) => {
     try {
         const{username, email, password} = req.body;
         if(!username || !email || !password){
-          return  res.status(400).json({message: "All fields are required!"});
+          return  next(errorHandler(400, "All fields are required!"))
         }
         if(password.length < 6){
-           return res.status(400).json({message: "Password must be at least 6 characters!"})
+           return next(errorHandler(400, "Password must be at least 6 characters!"))
         }
         if(username.length < 3){
            return res.status(400).json({message: "Username must be at least 3 characters!"})
@@ -33,7 +33,6 @@ export const registerUser = async (req, res, next) => {
                 reason: validateResults.reason
             })
         }
-        
         const existingUsername=  await User.findOne({username})
         if(existingUsername){
            return res.status(400).json({message: "Username already exists"})
@@ -66,4 +65,37 @@ export const registerUser = async (req, res, next) => {
 
 
 
-export const signInUser = async (req, res) => {}
+// Login functionalities here
+export const signInUser = async (req, res, next) => {
+    try {
+        const {email, password} = req.body;
+        if(!email || !password){
+            return next(errorHandler(400, "All fields are required!"))
+        }
+    //     checking if the user exists
+        const user = await User.findOne({email} );
+        if(!user){
+            return next(errorHandler(400, "Invalid credentials!"))
+        }
+    //     checking is password is good
+        const isPasswordCorrect = await user.comparePassword(password);
+        if(!isPasswordCorrect){
+            return next(errorHandler(400, "Invalid credentials!"))
+        }
+    //     generate token
+        const token = generateToken(user._id)
+        res.status(201).json({
+            token,
+            user:{
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                password: user.password,
+                profileImage: user.profileImage
+            }
+        })
+    }
+    catch (error) {
+        
+    }
+}
