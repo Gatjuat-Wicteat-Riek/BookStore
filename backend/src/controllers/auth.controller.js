@@ -4,7 +4,7 @@ import { errorHandler } from "../utils/error.js";
 import { validate } from "deep-email-validator";
 
 const generateToken = (userId)=>{
-    return jwt.sign({userId}, process.env.JWT_SECRET, {expiresIn: "1d"})
+    return jwt.sign({ userId }, process.env.JWT_SECRET, {expiresIn: "1d"})
 }
 
 export const registerUser = async (req, res, next) => {
@@ -20,7 +20,7 @@ export const registerUser = async (req, res, next) => {
            return res.status(400).json({message: "Username must be at least 3 characters!"})
         }
         // Checking the existing user with email and username
-        const existingEmail=  await User.findOne({email});
+        const existingEmail=  await User.findOne({ email });
         if(existingEmail){
            return res.status(400).json({message: "Email already exists"})
         }
@@ -33,7 +33,7 @@ export const registerUser = async (req, res, next) => {
                 reason: validateResults.reason
             })
         }
-        const existingUsername=  await User.findOne({username})
+        const existingUsername=  await User.findOne({ username })
         if(existingUsername){
            return res.status(400).json({message: "Username already exists"})
         }
@@ -61,9 +61,6 @@ export const registerUser = async (req, res, next) => {
         return res.status(500).json({message: "Internal Server error!"})
     }
 }
-
-
-
 
 // Login functionalities here
 export const signInUser = async (req, res, next) => {
